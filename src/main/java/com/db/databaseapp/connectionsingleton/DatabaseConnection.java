@@ -12,9 +12,9 @@ public class DatabaseConnection {
     private DatabaseConnection() {
         try {
             Class.forName("org.postgresql.Driver");
-            String url = "jdbc:postgresql://localhost:5432/Users";
-            String username = "postgres";
-            String password = "sfiohto983caA";
+            String url = "jdbc:postgresql://34.118.45.23:5432/Users";
+            String username = "hometask3intensive";
+            String password = "rcMMEAsEi991BEaf";
             this.connection = DriverManager.getConnection(url, username, password);
         } catch (ClassNotFoundException | SQLException exception) {
             System.out.println("Database Connection Creation Failed : " + exception.getMessage());
