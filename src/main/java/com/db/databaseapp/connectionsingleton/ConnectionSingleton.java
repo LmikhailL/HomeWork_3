@@ -4,12 +4,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DatabaseConnection {
+public enum ConnectionSingleton {
+    INSTANCE;
 
-    private static DatabaseConnection instance;
     private Connection connection;
 
-    private DatabaseConnection() {
+    ConnectionSingleton() {
         try {
             Class.forName("org.postgresql.Driver");
             String url = "jdbc:postgresql://34.118.45.23:5432/Users";
@@ -21,16 +21,11 @@ public class DatabaseConnection {
         }
     }
 
-    public Connection getConnection() {
-        return connection;
+    public static ConnectionSingleton getInstance() {
+        return INSTANCE;
     }
 
-    public static DatabaseConnection getInstance() throws SQLException {
-        if (instance == null) {
-            instance = new DatabaseConnection();
-        } else if (instance.getConnection().isClosed()) {
-            instance = new DatabaseConnection();
-        }
-        return instance;
+    public Connection getConnection() {
+        return connection;
     }
 }

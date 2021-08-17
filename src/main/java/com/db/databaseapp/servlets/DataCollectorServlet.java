@@ -1,6 +1,6 @@
 package com.db.databaseapp.servlets;
 
-import com.db.databaseapp.pojo.User;
+import com.db.databaseapp.beans.User;
 import com.db.databaseapp.service.UserService;
 
 import javax.servlet.ServletException;

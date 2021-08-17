@@ -1,7 +1,7 @@
 package com.db.databaseapp.dao;
 
-import com.db.databaseapp.connectionsingleton.DatabaseConnection;
-import com.db.databaseapp.pojo.User;
+import com.db.databaseapp.connectionsingleton.ConnectionSingleton;
+import com.db.databaseapp.beans.User;
 
 import java.sql.*;
 import java.util.Set;
@@ -15,8 +15,8 @@ public class UserDao implements Dao<User> {
         Connection connection = null;
         String sql = "select * from public.users where isdeleted = false";
         try {
-            DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
-            connection = databaseConnection.getConnection();
+            ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
+            connection = connectionSingleton.getConnection();
             try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(sql);
                 while (resultSet.next()) {
@@ -30,14 +30,6 @@ public class UserDao implements Dao<User> {
             }
         } catch (SQLException sqlException) {
             System.out.println("Exception while printing users: " + sqlException.getMessage());
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException | NullPointerException exception) {
-                System.out.println("Exception while closing the DB connection: " + exception.getMessage());
-            }
         }
         return users;
     }
@@ -45,25 +37,19 @@ public class UserDao implements Dao<User> {
     @Override
     public void deleteUserById(int id) {
         Connection connection = null;
-        String sql = String.format("update public.users " +
-                "set isDeleted = true " +
-                "where public.users.user_id = %d", id);
+        String sql = "update public.users " +
+                "set isDeleted = ? " +
+                "where public.users.user_id = ?";
         try {
-            DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
-            connection = databaseConnection.getConnection();
-            try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate(sql);
+            ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
+            connection = connectionSingleton.getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setBoolean(1, true);
+                preparedStatement.setInt(2, id);
+                preparedStatement.executeUpdate();
             }
         } catch (SQLException sqlException) {
             System.out.println("Exception while deleting user by id: " + sqlException.getMessage());
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException | NullPointerException exception) {
-                System.out.println("Exception while closing the DB connection: " + exception.getMessage());
-            }
         }
     }
 
@@ -73,8 +59,8 @@ public class UserDao implements Dao<User> {
             Connection connection = null;
             String sql = "insert into public.users(user_age, first_name, last_name) values (?, ?, ?)";
             try {
-                DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
-                connection = databaseConnection.getConnection();
+                ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
+                connection = connectionSingleton.getConnection();
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                     preparedStatement.setInt(1, user.getUserAge());
                     preparedStatement.setString(2, user.getFirstName());
@@ -83,14 +69,6 @@ public class UserDao implements Dao<User> {
                 }
             } catch (SQLException sqlException) {
                 System.out.println("Exception while adding user: " + sqlException.getMessage());
-            } finally {
-                try {
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (SQLException | NullPointerException exception) {
-                    System.out.println("Exception while closing the DB connection: " + exception.getMessage());
-                }
             }
         }
     }
@@ -101,8 +79,8 @@ public class UserDao implements Dao<User> {
         User user = null;
         String sql = String.format("select * from public.users where user_id = %d", id);
         try {
-            DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
-            connection = databaseConnection.getConnection();
+            ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
+            connection = connectionSingleton.getConnection();
             try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(sql);
                 if (resultSet.next()) {
@@ -115,14 +93,6 @@ public class UserDao implements Dao<User> {
             }
         } catch (SQLException sqlException) {
             System.out.println("Exception while selecting users by id: " + sqlException.getMessage());
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException | NullPointerException exception) {
-                System.out.println("Exception while closing the DB connection: " + exception.getMessage());
-            }
         }
         return user;
     }
@@ -136,8 +106,8 @@ public class UserDao implements Dao<User> {
                 "last_name = ? " +
                 "where user_id = ?";
         try {
-            DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
-            connection = databaseConnection.getConnection();
+            ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
+            connection = connectionSingleton.getConnection();
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, user.getUserAge());
                 preparedStatement.setString(2, user.getFirstName());
@@ -147,14 +117,6 @@ public class UserDao implements Dao<User> {
             }
         } catch (SQLException sqlException) {
             System.out.println("Exception while updating users: " + sqlException.getMessage());
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException | NullPointerException exception) {
-                System.out.println("Exception while closing the DB connection: " + exception.getMessage());
-            }
         }
         return 0;
     }

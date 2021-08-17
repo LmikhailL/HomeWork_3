@@ -1,4 +1,4 @@
-package com.db.databaseapp.pojo;
+package com.db.databaseapp.beans;
 
 import java.util.Objects;
 

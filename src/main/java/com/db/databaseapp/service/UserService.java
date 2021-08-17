@@ -1,7 +1,7 @@
 package com.db.databaseapp.service;
 
 import com.db.databaseapp.dao.UserDao;
-import com.db.databaseapp.pojo.User;
+import com.db.databaseapp.beans.User;
 
 import java.util.Set;
 
