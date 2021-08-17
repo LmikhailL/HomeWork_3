@@ -2,6 +2,9 @@ package com.db.databaseapp.dao;
 
 import com.db.databaseapp.connectionsingleton.ConnectionSingleton;
 import com.db.databaseapp.beans.User;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.Set;
@@ -9,16 +12,17 @@ import java.util.TreeSet;
 
 public class UserDao implements Dao<User> {
     protected Set<User> users = new TreeSet<>();
+    Logger rootLogger = LogManager.getRootLogger();
 
     @Override
     public Set<User> getAllUsers() {
-        Connection connection = null;
-        String sql = "select * from public.users where isdeleted = false";
+        String sql = "select * from public.users where isdeleted = ?";
         try {
             ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-            connection = connectionSingleton.getConnection();
-            try (Statement statement = connection.createStatement()) {
-                ResultSet resultSet = statement.executeQuery(sql);
+            Connection connection = connectionSingleton.getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setBoolean(1, false);
+                ResultSet resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()) {
                     int userId = resultSet.getInt(1);
                     int userAge = resultSet.getInt(3);
@@ -29,38 +33,36 @@ public class UserDao implements Dao<User> {
                 }
             }
         } catch (SQLException sqlException) {
-            System.out.println("Exception while printing users: " + sqlException.getMessage());
+            rootLogger.log(Level.WARN, "Exception while printing users: " + sqlException.getMessage());
         }
         return users;
     }
 
     @Override
     public void deleteUserById(int id) {
-        Connection connection = null;
         String sql = "update public.users " +
                 "set isDeleted = ? " +
                 "where public.users.user_id = ?";
         try {
             ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-            connection = connectionSingleton.getConnection();
+            Connection connection = connectionSingleton.getConnection();
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setBoolean(1, true);
                 preparedStatement.setInt(2, id);
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException sqlException) {
-            System.out.println("Exception while deleting user by id: " + sqlException.getMessage());
+            rootLogger.log(Level.WARN, "Exception while deleting users by id: " + sqlException.getMessage());
         }
     }
 
     @Override
     public void addUser(User user) {
         if (!contains(user)) {
-            Connection connection = null;
             String sql = "insert into public.users(user_age, first_name, last_name) values (?, ?, ?)";
             try {
                 ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-                connection = connectionSingleton.getConnection();
+                Connection connection = connectionSingleton.getConnection();
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                     preparedStatement.setInt(1, user.getUserAge());
                     preparedStatement.setString(2, user.getFirstName());
@@ -68,21 +70,21 @@ public class UserDao implements Dao<User> {
                     preparedStatement.executeUpdate();
                 }
             } catch (SQLException sqlException) {
-                System.out.println("Exception while adding user: " + sqlException.getMessage());
+                rootLogger.log(Level.WARN, "Exception while adding users: " + sqlException.getMessage());
             }
         }
     }
 
     @Override
     public User selectById(int id) {
-        Connection connection = null;
         User user = null;
-        String sql = String.format("select * from public.users where user_id = %d", id);
+        String sql = "select * from public.users where user_id = ?";
         try {
             ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-            connection = connectionSingleton.getConnection();
-            try (Statement statement = connection.createStatement()) {
-                ResultSet resultSet = statement.executeQuery(sql);
+            Connection connection = connectionSingleton.getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, id);
+                ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     int userId = resultSet.getInt(1);
                     int userAge = resultSet.getInt(3);
@@ -92,14 +94,13 @@ public class UserDao implements Dao<User> {
                 }
             }
         } catch (SQLException sqlException) {
-            System.out.println("Exception while selecting users by id: " + sqlException.getMessage());
+            rootLogger.log(Level.WARN, "Exception while selecting users by id: " + sqlException.getMessage());
         }
         return user;
     }
 
     @Override
     public int updateUser(User user) {
-        Connection connection = null;
         String sql = "update public.users " +
                 "set user_age = ?, " +
                 "first_name = ?, " +
@@ -107,7 +108,7 @@ public class UserDao implements Dao<User> {
                 "where user_id = ?";
         try {
             ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-            connection = connectionSingleton.getConnection();
+            Connection connection = connectionSingleton.getConnection();
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, user.getUserAge());
                 preparedStatement.setString(2, user.getFirstName());
@@ -116,7 +117,7 @@ public class UserDao implements Dao<User> {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException sqlException) {
-            System.out.println("Exception while updating users: " + sqlException.getMessage());
+            rootLogger.log(Level.WARN, "Exception while updating users: " + sqlException.getMessage());
         }
         return 0;
     }
