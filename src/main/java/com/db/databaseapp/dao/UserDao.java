@@ -20,6 +20,7 @@ public class UserDao implements Dao<User> {
         try {
             ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
             Connection connection = connectionSingleton.getConnection();
+            connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setBoolean(1, false);
                 ResultSet resultSet = preparedStatement.executeQuery();
@@ -46,6 +47,7 @@ public class UserDao implements Dao<User> {
         try {
             ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
             Connection connection = connectionSingleton.getConnection();
+            connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setBoolean(1, true);
                 preparedStatement.setInt(2, id);
@@ -63,6 +65,7 @@ public class UserDao implements Dao<User> {
             try {
                 ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
                 Connection connection = connectionSingleton.getConnection();
+                connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                     preparedStatement.setInt(1, user.getUserAge());
                     preparedStatement.setString(2, user.getFirstName());
@@ -82,6 +85,7 @@ public class UserDao implements Dao<User> {
         try {
             ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
             Connection connection = connectionSingleton.getConnection();
+            connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, id);
                 ResultSet resultSet = preparedStatement.executeQuery();
@@ -109,6 +113,7 @@ public class UserDao implements Dao<User> {
         try {
             ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
             Connection connection = connectionSingleton.getConnection();
+            connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, user.getUserAge());
                 preparedStatement.setString(2, user.getFirstName());
@@ -125,7 +130,7 @@ public class UserDao implements Dao<User> {
     @Override
     public boolean contains(User user) {
         if (users.contains(user)) {
-            System.out.println("User has already added!");
+            rootLogger.log(Level.WARN, "Attention! Can not insert, user is already exists");
             return true;
         }
         return false;
