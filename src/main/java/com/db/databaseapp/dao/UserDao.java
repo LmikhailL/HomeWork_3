@@ -1,6 +1,6 @@
 package com.db.databaseapp.dao;
 
-import com.db.databaseapp.connectionsingleton.ConnectionSingleton;
+import com.db.databaseapp.connectionsingleton.DatabaseConnection;
 import com.db.databaseapp.beans.User;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -17,9 +17,7 @@ public class UserDao implements Dao<User> {
     @Override
     public Set<User> getAllUsers() {
         String sql = "select * from public.users where isdeleted = ?";
-        try {
-            ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-            Connection connection = connectionSingleton.getConnection();
+        try (Connection connection = DatabaseConnection.getInstance().getConnection()) {
             connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setBoolean(1, false);
@@ -44,9 +42,7 @@ public class UserDao implements Dao<User> {
         String sql = "update public.users " +
                 "set isDeleted = ? " +
                 "where public.users.user_id = ?";
-        try {
-            ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-            Connection connection = connectionSingleton.getConnection();
+        try (Connection connection = DatabaseConnection.getInstance().getConnection()) {
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setBoolean(1, true);
@@ -62,9 +58,7 @@ public class UserDao implements Dao<User> {
     public void addUser(User user) {
         if (!contains(user)) {
             String sql = "insert into public.users(user_age, first_name, last_name) values (?, ?, ?)";
-            try {
-                ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-                Connection connection = connectionSingleton.getConnection();
+            try (Connection connection = DatabaseConnection.getInstance().getConnection()) {
                 connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                     preparedStatement.setInt(1, user.getUserAge());
@@ -82,9 +76,7 @@ public class UserDao implements Dao<User> {
     public User selectById(int id) {
         User user = null;
         String sql = "select * from public.users where user_id = ?";
-        try {
-            ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-            Connection connection = connectionSingleton.getConnection();
+        try (Connection connection = DatabaseConnection.getInstance().getConnection()) {
             connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, id);
@@ -110,9 +102,7 @@ public class UserDao implements Dao<User> {
                 "first_name = ?, " +
                 "last_name = ? " +
                 "where user_id = ?";
-        try {
-            ConnectionSingleton connectionSingleton = ConnectionSingleton.getInstance();
-            Connection connection = connectionSingleton.getConnection();
+        try (Connection connection = DatabaseConnection.getInstance().getConnection()){
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, user.getUserAge());
